@@ -35,10 +35,10 @@ class ImpedanceData:
                 elif user_choice == "4":
                     self.Z = 1 / (1 / self.ro + 1j * (self.omega * self.C - (1 / (self.omega * self.L))))
                     self.Z_type = "parallel"
+
+            ImpedanceData.impedance_data.append(self)
         except ValueError or IOError:
             print("Invalid value!")
-
-        ImpedanceData.impedance_data.append(self)
 
     @classmethod
     def create_impedance_data(cls):
@@ -46,6 +46,8 @@ class ImpedanceData:
 
     @classmethod
     def show_impedance_data(cls):
+        if len(ImpedanceData.impedance_data) == 0:
+            return print("Impedance data is empty!")
         counter = 0
         for obj in cls.impedance_data:
             print("\nIMPEDANCE: ")

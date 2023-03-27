@@ -5,9 +5,9 @@ class CommonData:
     common_data = []
 
     def __init__(self):
-        # self.omega: float = 6 * pow(10, 9)
-        self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
         try:
+            # self.omega: float = 6 * pow(10, 9)
+            self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
             self.mu_0: float = 4 * 3.14 * pow(10, -7)
             self.epsilon_0 = 8.85 * pow(10, -12)
             self.mu_1 = complex(input("\nmu1(a-bj): "))
@@ -16,11 +16,11 @@ class CommonData:
             self.sigma_2 = int(input("sigma2: "))
             self.c = float(input("c: "))
             self.a = int(input("a(nm): ")) * pow(10, -9)
-            self.d = int(input("d(m): "))
+            self.d = float(input("d(m): "))
+
+            CommonData.common_data.append(self)
         except ValueError or IOError:
             print("Invalid value!")
-
-        CommonData.common_data.append(self)
 
     @classmethod
     def create_common_data(cls):
@@ -28,6 +28,8 @@ class CommonData:
 
     @classmethod
     def show_common_data(cls):
+        if len(CommonData.common_data) == 0:
+            return print("Common data is empty!")
         counter = 0
         for obj in cls.common_data:
             print("\nCOMMON:")

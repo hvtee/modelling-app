@@ -24,8 +24,9 @@ def run_model():
             id_choice = 0
             print("Invalid impedance dataSET №, impedance data -> SET №0")
 
-        solve_mu(cd_choice, id_choice)
-        solve_epsilon(cd_choice, id_choice)
+        # solve_mu(cd_choice, id_choice)
+        # solve_epsilon(cd_choice, id_choice)
+        solve(cd_choice, id_choice)
     else:
         print("Common data or Impedance data are missing!")
 
