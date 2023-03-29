@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy
 
 
@@ -5,7 +8,7 @@ class ImpedanceData:
     impedance_data = []
 
     def __init__(self):
-        # omega: float = 6 * pow(10, 9)
+        # self.omega: float = 6 * pow(10, 9)
         self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
         try:
             self.ro = float(input("\nro: "))
@@ -57,6 +60,36 @@ class ImpedanceData:
             print(f"L: {obj.L}")
             print(f"Z: {obj.Z[0]} - {obj.Z[-1]}, {obj.Z_type}\n")
             counter += 1
+
+    @staticmethod
+    def save_instances_to_file():
+        if not ImpedanceData.impedance_data:
+            print("No instances to save in impedance_data.pkl.")
+            return
+
+        with open("data/impedance_data.pkl", 'wb') as file:
+            pickle.dump(ImpedanceData.impedance_data, file)
+            print("Saved impedance_data.pkl successfully")
+
+    @staticmethod
+    def load_instances_from_file():
+        if not os.path.exists("data/impedance_data.pkl") or os.path.getsize("data/impedance_data.pkl") == 0:
+            print("impedance_data.pkl file is empty or does not exist.")
+            return
+
+        with open("data/impedance_data.pkl", 'rb') as file:
+            ImpedanceData.impedance_data = pickle.load(file)
+
+    @staticmethod
+    def load_examples_from_file():
+        if not os.path.exists("data/examples_impedance_data.pkl") or \
+               os.path.getsize("data/examples_impedance_data.pkl") == 0:
+            print("examples_impedance_data.pkl file is empty or does not exist.")
+            return
+
+        with open("data/examples_impedance_data.pkl", 'rb') as file:
+            ImpedanceData.impedance_data = pickle.load(file)
+            print("examples_impedance_data.pkl loaded successfully")
 
 # Z_from_mu_consistent = ro + 1j * (ImpedanceData.impedance_data * L - (1 / (CommonData.omega * C)))
 # Z_from_mu_part_parallel = (ro + 1j * CommonData.omega * L) / (

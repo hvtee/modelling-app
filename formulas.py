@@ -1,3 +1,5 @@
+import math
+
 import numpy
 import matplotlib.pyplot as plot
 from math import e
@@ -11,9 +13,10 @@ def graph(x, y, str):
     plot.figure()
     plot.plot(x / (2 * 3.14), real, 'r')
     plot.plot(x / (2 * 3.14), imaginary, 'g')
+    plot.title(f"{str}(w/2pi)")
     plot.ylabel(str)
     plot.xlabel('w/2pi, Hz')
-
+    plot.grid(True)
 
 
 # def solve_mu(number_cd, number_id):
@@ -82,10 +85,11 @@ def solve(number_cd, number_id):
     gamma = 1j * omega * pow(mu * epsilon, 0.5)
     alpha = 8.68 * gamma.real
 
-    A_0 = 20 * numpy.log(abs((Z - 377) / (Z + 377)))
-    A_1 = alpha * CommonData.common_data[number_cd].d
-    A_2 = 20 * numpy.log(abs((Z * Z + 377) / (Z * 4 * 377)))
-    A_3 = 20 * numpy.log(abs(1 + pow(e, -2 * alpha * d / 8.69) * pow(((Z - 377) / (Z + 377)), 2)))
+    A_0 = 20 * numpy.log10(abs(((Z - 377) / (Z + 377))))
+    A_1 = alpha * d
+    A_2 = 20 * numpy.log10(abs(pow((377 + Z), 2) / (4 * 377 * Z)))
+    A_3 = 20 * numpy.log10(abs(1 + pow(e, (-2 * alpha * d) / 8.69) * pow(((Z - 377) / (Z + 377)), 2)))
+
     T = A_1 + A_2 + A_3
     D = 1 - pow(10, A_0 / 20) - pow(10, -T / 20)
 
