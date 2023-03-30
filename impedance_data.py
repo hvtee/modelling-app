@@ -9,8 +9,11 @@ class ImpedanceData:
 
     def __init__(self):
         # self.omega: float = 6 * pow(10, 9)
-        self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
         try:
+            self.name = input("Name of common data set: ")
+            if any(data.name == self.name for data in ImpedanceData.impedance_data):
+                raise ValueError("Name already exists")
+            self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
             self.ro = float(input("\nro: "))
             self.C = float(input("C(pF): ")) * pow(10, -12)
             self.L = float(input("L(pHn): ")) * pow(10, -12)
@@ -40,8 +43,10 @@ class ImpedanceData:
                     self.Z_type = "parallel"
 
             ImpedanceData.impedance_data.append(self)
-        except ValueError or IOError:
-            print("Invalid value!")
+        except ValueError as ve:
+            print(f"Invalid value! {ve}")
+        except IOError as ioe:
+            print(f"IO error! {ioe}")
 
     @classmethod
     def create_impedance_data(cls):
@@ -55,6 +60,7 @@ class ImpedanceData:
         for obj in cls.impedance_data:
             print("\nIMPEDANCE: ")
             print(f"Set No: {counter}")
+            print(f"Name of impedance data set: {obj.name}")
             print(f"ro: {obj.ro}")
             print(f"C: {obj.C}")
             print(f"L: {obj.L}")

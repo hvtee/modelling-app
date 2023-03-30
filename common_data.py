@@ -10,6 +10,9 @@ class CommonData:
     def __init__(self):
         try:
             # self.omega: float = 6 * pow(10, 9)
+            self.name = input("Name of common data set: ")
+            if any(data.name == self.name for data in CommonData.common_data):
+                raise ValueError("Name already exists")
             self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
             self.mu_0: float = 4 * 3.14 * pow(10, -7)
             self.epsilon_0 = 8.85 * pow(10, -12)
@@ -22,8 +25,10 @@ class CommonData:
             self.d = float(input("d(m): "))
 
             CommonData.common_data.append(self)
-        except ValueError or IOError:
-            print("Invalid value!")
+        except ValueError as ve:
+            print(f"Invalid value! {ve}")
+        except IOError as ioe:
+            print(f"IO error! {ioe}")
 
     @classmethod
     def create_common_data(cls):
@@ -37,6 +42,7 @@ class CommonData:
         for obj in cls.common_data:
             print("\nCOMMON:")
             print(f"SET No: {counter}")
+            print(f"name: {obj.name}")
             print(f"omega: {obj.omega[0]} - {obj.omega[-1]}")
             print(f"mu0: {obj.mu_0}")
             print(f"mu1: {obj.mu_1}")
