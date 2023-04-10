@@ -1,56 +1,68 @@
 import os
 import pickle
+import sqlite3
 
 import numpy
+from numpy import ndarray
 
 
 class ImpedanceData:
     impedance_data = []
 
-    def __init__(self):
-        # self.omega: float = 6 * pow(10, 9)
+    def __init__(self, name, omega, ro, C, L, Z, Z_type):
+        self.name = name
+        self.omega = omega
+        self.ro = ro
+        self.C = C
+        self.L = L
+        self.Z = Z
+        self.Z_type = Z_type
+
+        ImpedanceData.impedance_data.append(self)
+
+    @classmethod
+    def create_impedance_data(cls):
         try:
-            self.name = input("Name of common data set: ")
-            if any(data.name == self.name for data in ImpedanceData.impedance_data):
-                raise ValueError("Name already exists")
-            self.omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
-            self.ro = float(input("\nro: "))
-            self.C = float(input("C(pF): ")) * pow(10, -12)
-            self.L = float(input("L(pHn): ")) * pow(10, -12)
+            name = input("\nName of impedance data set: ")
+            omega = numpy.linspace(6 * pow(10, 9), 6 * pow(10, 10), 540)
+            ro = float(input("\nro: "))
+            C = float(input("C(pF): ")) * pow(10, -12)
+            L = float(input("L(pHn): ")) * pow(10, -12)
 
             user_choice = 0
             while user_choice not in ["1", "2", "3", "4"]:
                 user_choice = str(input("""Choose impedance:
-                1 - consistent
-                2 - part_parallel
-                3 - consistent_parallel
-                4 - parallel
-                Input: """))
+                           1 - consistent
+                           2 - part_parallel
+                           3 - consistent_parallel
+                           4 - parallel
+                           Input: """))
                 print()
 
                 if user_choice == "1":
-                    self.Z = self.ro + 1j * (self.omega * self.L - (1 / (self.omega * self.C)))
-                    self.Z_type = "consistent"
+                    Z = ro + 1j * (omega * L - (1 / (omega * C)))
+                    Z_type = "consistent"
                 elif user_choice == "2":
-                    self.Z = (self.ro + 1j * self.omega * self.L) / (1j * self.omega * self.C * (
-                            self.ro + 1j * (self.omega * self.L - (1 / (self.omega * self.C)))))
-                    self.Z_type = "part_parallel"
+                    Z = (ro + 1j * omega * L) / (1j * omega * C * (
+                            ro + 1j * (omega * L - (1 / (omega * C)))))
+                    Z_type = "part_parallel"
                 elif user_choice == "3":
-                    self.Z = self.ro + (1 / (1j * self.omega * self.C + (1 / (1j * self.omega * self.L))))
-                    self.Z_type = "consistent_parallel"
+                    Z = ro + (1 / (1j * omega * C + (1 / (1j * omega * L))))
+                    Z_type = "consistent_parallel"
                 elif user_choice == "4":
-                    self.Z = 1 / (1 / self.ro + 1j * (self.omega * self.C - (1 / (self.omega * self.L))))
-                    self.Z_type = "parallel"
+                    Z = 1 / (1 / ro + 1j * (omega * C - (1 / (omega * L))))
+                    Z_type = "parallel"
+                else:
+                    print("Wrong choice!")
+                    print("Z type set to consistent")
+                    Z = ro + 1j * (omega * L - (1 / (omega * C)))
+                    Z_type = "consistent"
 
-            ImpedanceData.impedance_data.append(self)
+                return cls(name, omega, ro, C, L, Z, Z_type)
         except ValueError as ve:
             print(f"Invalid value! {ve}")
         except IOError as ioe:
             print(f"IO error! {ioe}")
-
-    @classmethod
-    def create_impedance_data(cls):
-        return cls()
 
     @classmethod
     def show_impedance_data(cls):
@@ -67,35 +79,92 @@ class ImpedanceData:
             print(f"Z: {obj.Z[0]} - {obj.Z[-1]}, {obj.Z_type}\n")
             counter += 1
 
-    @staticmethod
-    def save_instances_to_file():
-        if not ImpedanceData.impedance_data:
-            print("No instances to save in impedance_data.pkl.")
-            return
+    def save_to_db(self):
+        try:
+            ImpedanceData.show_impedance_data()
+            conn = sqlite3.connect('impedance_data.db')
+            cur = conn.cursor()
+            cur.execute("""
+                    CREATE TABLE IF NOT EXISTS impedance_data (
+                        name TEXT UNIQUE,
+                        omega BLOB,
+                        ro REAL,
+                        C REAL,
+                        L REAL,
+                        Z BLOB,
+                        Z_type TEXT
+                    )
+                    """)
+            values = (self.name, ndarray.tobytes(self.omega), self.ro, self.C,
+                      self.L, ndarray.tobytes(numpy.asarray(self.Z)), self.Z_type)
+            cur.execute('INSERT INTO impedance_data VALUES (?,?,?,?,?,?,?)', values)
+            conn.commit()
+            cur.close()
+            conn.close()
+            print("Saved with no errors.")
+        except sqlite3.Error as e:
+            print(f"Error saving to database: {e}")
 
-        with open("data/impedance_data.pkl", 'wb') as file:
-            pickle.dump(ImpedanceData.impedance_data, file)
-            print("Saved impedance_data.pkl successfully")
+    @classmethod
+    def load_from_db(cls):
+        try:
+            conn = sqlite3.connect('impedance_data.db')
+            cur = conn.cursor()
+            cur.execute("""SELECT
+                        name,
+                        ro,
+                        C,
+                        L,
+                        Z,
+                        Z_type
+                        FROM impedance_data""")
+            rows = cur.fetchall()
 
-    @staticmethod
-    def load_instances_from_file():
-        if not os.path.exists("data/impedance_data.pkl") or os.path.getsize("data/impedance_data.pkl") == 0:
-            print("impedance_data.pkl file is empty or does not exist.")
-            return
+            if len(rows) == 0:
+                print("No data found in database!")
+                return
 
-        with open("data/impedance_data.pkl", 'rb') as file:
-            ImpedanceData.impedance_data = pickle.load(file)
+            counter = 0
+            for row in rows:
+                print(f"\nSET № {counter}")
+                print(f"name: {row[0]}")
+                print(f"ro: {row[1]}")
+                print(f"C: {row[2]}")
+                print(f"L: {row[3]}")
+                Z = numpy.frombuffer(row[4]).reshape(-1, 2)
+                # print(f"Z: {Z[:, 0] + 1j * Z[:, 1]}")
+                print(f"Z_type: {row[5]}")
+                counter += 1
 
-    @staticmethod
-    def load_examples_from_file():
-        if not os.path.exists("data/examples_impedance_data.pkl") or \
-               os.path.getsize("data/examples_impedance_data.pkl") == 0:
-            print("examples_impedance_data.pkl file is empty or does not exist.")
-            return
+            cur.execute("""SELECT * FROM impedance_data""")
+            rows = cur.fetchall()
+            try:
+                choice = int(input("Choose SET № "))
+                if choice >= len(rows) or choice < 0:
+                    print("Wrong SET №!")
+                    print("SET № is 0")
+                    choice = 0
+            except ValueError or IOError:
+                print("Wrong data!")
+                print("SET № is 0")
+                choice = 0
+                print("Success")
 
-        with open("data/examples_impedance_data.pkl", 'rb') as file:
-            ImpedanceData.impedance_data = pickle.load(file)
-            print("examples_impedance_data.pkl loaded successfully")
+            try:
+                row = rows[choice]
+                Z = numpy.frombuffer(row[5]).reshape(-1, 2)
+                ImpedanceData(row[0], numpy.frombuffer(row[1]), row[2], row[3], row[4],
+                              Z[:, 0] + 1j * Z[:, 1], row[6])
+            except ValueError:
+                print("Error occurred in values of SET")
+
+            cur.close()
+            conn.close()
+            print("Success")
+        except sqlite3.Error as e:
+            print(f"Error loading from database: {e}")
+        except ValueError as ve:
+            print(f"Invalid value! {ve}")
 
 # Z_from_mu_consistent = ro + 1j * (ImpedanceData.impedance_data * L - (1 / (CommonData.omega * C)))
 # Z_from_mu_part_parallel = (ro + 1j * CommonData.omega * L) / (

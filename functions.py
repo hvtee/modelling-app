@@ -29,6 +29,7 @@ def run_model():
         solve(cd_choice, id_choice)
     else:
         print("Common data or Impedance data are missing!")
+        return
 
 # print_info()
 # graph(omega, mu_from_omega)
