@@ -68,4 +68,6 @@ def do_action():
     elif action == "0":
         quit()
 
-# class UI:
+
+class UI:
+    pass
