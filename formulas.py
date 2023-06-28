@@ -1,36 +1,42 @@
-import math
-
 import numpy
 import matplotlib.pyplot as plot
 from math import e
-from common_data import CommonData
-from impedance_data import ImpedanceData
+from classes.Environment import Environment
+from classes.Constants import Constants
+from classes.Nanoparticles import Nanoparticles
+from classes.Nanostructures import Nanostructures
 
 
-def graph(x, y, str):
+def graph(x, y, string):
     real = y.real
     imaginary = y.imag
     plot.figure()
     plot.plot(x / (2 * 3.14), real, 'r')
     plot.plot(x / (2 * 3.14), imaginary, 'g')
-    plot.title(f"{str}(w/2pi)")
-    plot.ylabel(str)
-    plot.xlabel('w/2pi, Hz')
+    plot.title(f"{string}(\u03C9/2\u03C0)")
+    plot.ylabel(string)
+    plot.xlabel('\u03C9/2\u03C0, Hz')
     plot.grid(True)
 
 
-def solve(number_cd, number_id):
-    omega = CommonData.common_data[number_cd].omega
-    mu_0 = CommonData.common_data[number_cd].mu_0
-    epsilon_0 = CommonData.common_data[number_cd].epsilon_0
-    mu_1 = CommonData.common_data[number_cd].mu_1
-    mu_2 = CommonData.common_data[number_cd].mu_2
-    sigma_1 = CommonData.common_data[number_cd].sigma_1
-    sigma_2 = CommonData.common_data[number_cd].sigma_2
-    c = CommonData.common_data[number_cd].c
-    a = CommonData.common_data[number_cd].a
-    d = CommonData.common_data[number_cd].d
-    Z_from_omega = ImpedanceData.impedance_data[number_id].Z
+def solve(number_npart, number_nstruct, number_envir, omega, Z):
+    mu_0 = Constants.mu_0
+    epsilon_0 = Constants.epsilon_0
+    mu_1 = Environment.environment_data[number_envir].mu_1
+    mu_2 = Nanoparticles.nanoparticles_data[number_npart].mu_2
+    sigma_1 = Environment.environment_data[number_envir].sigma_1
+    sigma_2 = Nanoparticles.nanoparticles_data[number_npart].sigma_2
+    c = Nanoparticles.nanoparticles_data[number_npart].c
+    a = Nanoparticles.nanoparticles_data[number_npart].a
+    d = Environment.environment_data[number_envir].d
+    ro = Nanostructures.nanostructures_data[number_nstruct].ro
+    C = Nanostructures.nanostructures_data[number_nstruct].C
+    L = Nanostructures.nanostructures_data[number_nstruct].L
+
+    omega_copy = numpy.copy(omega)
+    var = {'ro': ro, 'C': C, 'L': L, 'omega': omega_copy}
+    Z_from_omega = eval(Z, var)
+    # Z_from_omega = complex(eval(Z.format(ro=ro, C=C, L=L, omega=omega_str)))
 
     Q_mu = (1 / mu_2) - ((1j * omega * a * mu_0) / (2 * Z_from_omega))
     B_mu = ((3 - 5 * c) - mu_1 * Q_mu * (6 - 7 * c)) / (3 - 2 * c)
@@ -57,9 +63,9 @@ def solve(number_cd, number_id):
     T = A_1 + A_2 + A_3
     D = 1 - pow(10, A_0 / 20) - pow(10, -T / 20)
 
-    graph(omega, mu_from_omega, "mu")
-    graph(omega, epsilon_from_omega, "epsilon")
-    graph(omega, A_0, "A_0")
+    graph(omega, mu_from_omega, "\u03BC")
+    graph(omega, epsilon_from_omega, "\u03B5")
+    graph(omega, A_0, "R")
     graph(omega, T, "T")
     graph(omega, D, "D")
     plot.show()
