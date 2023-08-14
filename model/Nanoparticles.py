@@ -1,32 +1,34 @@
 import sqlite3
-from classes.sql import SQL
+from model.sql import SQL
 
 
-class Environment:
-    environment_data = []
+class Nanoparticles:
+    nanoparticles_data = []
 
-    def __init__(self, name, mu_1, sigma_1, d):
+    def __init__(self, name, mu_2, sigma_2, c, a):
         try:
             self.name = name
-            self.mu_1 = mu_1
-            self.sigma_1 = sigma_1
-            self.d = d
+            self.mu_2 = mu_2
+            self.sigma_2 = sigma_2
+            self.c = c
+            self.a = a
 
-            Environment.environment_data.append(self)
+            Nanoparticles.nanoparticles_data.append(self)
         except ValueError as ve:
             print(f"Invalid value! {ve}")
         except IOError as ioe:
             print(f"IO error! {ioe}")
 
     @classmethod
-    def create_environment_data(cls):
+    def create_nanoparticles_data(cls):
         try:
-            name = input("\nName of environment_data set: ")
-            mu_1 = complex(input("mu1(a-bj): "))
-            sigma_1 = int(input("sigma1: "))
-            d = float(input("d(m): "))
+            name = input("\nName of nanoparticles data set: ")
+            mu_2 = complex(input("mu2(a-bj): "))
+            sigma_2 = int(input("sigma2: "))
+            c = float(input("c: "))
+            a = int(input("a(nm): ")) * pow(10, -9)
 
-            return cls(name, mu_1, sigma_1, d)
+            return cls(name, mu_2, sigma_2, c, a)
         except ValueError as ve:
             print(f"Invalid value! {ve}")
         except IOError as ioe:
@@ -35,31 +37,32 @@ class Environment:
             print(f"AE: {ae}")
 
     @classmethod
-    def show_environment_data(cls):
-        if len(Environment.environment_data) == 0:
-            return print("environment_data is empty!")
+    def show_nanoparticles_data(cls):
+        if len(Nanoparticles.nanoparticles_data) == 0:
+            return print("Nanoparticles data is empty!")
 
         try:
             counter = 0
-            for obj in cls.environment_data:
-                print("\nEnvironment:")
+            for obj in cls.nanoparticles_data:
+                print("\nNANOPARTICLES:")
                 print(f"SET No: {counter}")
                 print(f"name: {obj.name}")
-                print(f"mu1: {obj.mu_1}")
-                print(f"sigma1: {obj.sigma_1}")
-                print(f"d: {obj.d}")
+                print(f"mu2: {obj.mu_2}")
+                print(f"sigma2: {obj.sigma_2}")
+                print(f"c: {obj.c}")
+                print(f"a: {obj.a}")
                 counter += 1
         except AttributeError:
             print("AE")
 
     def save_to_db(self):
         try:
-            Environment.show_environment_data()
-            conn = sqlite3.connect('data/environment_data.db')
+            Nanoparticles.show_nanoparticles_data()
+            conn = sqlite3.connect('data/nanoparticles_data.db')
             cur = conn.cursor()
-            cur.execute(SQL.sql_envir_create)
-            values = (None, self.name, str(self.mu_1), self.sigma_1, self.d)
-            cur.execute('INSERT INTO environment_data VALUES (?,?,?,?,?)', values)
+            cur.execute(SQL.sql_npart_create)
+            values = (None, self.name, str(self.mu_2), self.sigma_2, self.c, self.a)
+            cur.execute('INSERT INTO nanoparticles_data VALUES (?,?,?,?,?,?)', values)
             conn.commit()
             cur.close()
             conn.close()
@@ -70,9 +73,9 @@ class Environment:
     @classmethod
     def load_from_db(cls):
         try:
-            conn = sqlite3.connect('data/environment_data.db')
+            conn = sqlite3.connect('data/nanoparticles_data.db')
             cur = conn.cursor()
-            cur.execute(SQL.sql_envir_all)
+            cur.execute(SQL.sql_npart_all)
             rows = cur.fetchall()
 
             if len(rows) == 0:
@@ -83,12 +86,13 @@ class Environment:
             for row in rows:
                 print(f"\nSET № {counter}")
                 print(f"name: {row[0]}")
-                print(f"mu_1: {row[1]}")
-                print(f"sigma_1: {row[2]}")
-                print(f"d: {row[3]}")
+                print(f"mu_2: {row[1]}")
+                print(f"sigma_2: {row[2]}")
+                print(f"c: {row[3]}")
+                print(f"a: {row[4]}")
                 counter += 1
 
-            cur.execute(SQL.sql_envir_all)
+            cur.execute(SQL.sql_npart_all)
             rows = cur.fetchall()
             try:
                 choice = int(input("Choose SET № "))
@@ -98,10 +102,13 @@ class Environment:
                     choice = 0
             except ValueError or IOError:
                 print("Wrong data!")
-                return
+                print("SET № is 0")
+                choice = 0
+                print("Success")
+
             try:
                 row = rows[choice]
-                Environment(row[0], complex(row[1]), row[2], row[3])
+                Nanoparticles(row[0], complex(row[1]), row[2], row[3], row[4])
             except ValueError:
                 print("Error occurred in values of SET")
 
@@ -116,19 +123,19 @@ class Environment:
     @classmethod
     def load_examples(cls):
         try:
-            conn = sqlite3.connect('data/environment_data.db')
+            conn = sqlite3.connect('data/nanoparticles_data.db')
             cur = conn.cursor()
-            cur.execute("SELECT * FROM environment_examples")
+            cur.execute("SELECT * FROM nanoparticles_examples")
             rows = cur.fetchall()
 
             if len(rows) == 0:
-                print("No data found in database(environment_examples)!")
+                print("No data found in database!(nanoparticles_examples)")
                 return
 
             for row in rows:
                 try:
-                    Environment(row[0], complex(row[1]), row[2], row[3])
-                except ValueError:
-                    print("Error occurred in values of SET")
+                    Nanoparticles(row[0], complex(row[1]), row[2], row[3], row[4])
+                except ValueError as ve:
+                    print(f"Invalid value! {ve}")
         except sqlite3.Error as e:
-            print(f"Error loading from database: {e}")
+            print(f"Error loading from database(npart): {e}")

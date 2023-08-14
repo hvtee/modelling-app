@@ -1,5 +1,5 @@
-from classes import Nanoparticles
-from formulas import *
+from model import Nanoparticles
+from model.formulas import *
 
 
 def choose_impedance():
@@ -34,35 +34,34 @@ def choose_impedance():
         #     return
 
 
-
 def choose_nanoparticles_data():
     Nanoparticles.show_nanoparticles_data()
     return int(input("nanoparticles_data. You choose SET No: "))
 
 
-def choose_nanostructures_data():
-    Nanostructures.show_nanostructures_data()
+def choose_fibers_data():
+    Fibers.show_fibers_data()
     return int(input("nanostructures_data.You choose SET No: "))
 
 
-def choose_environment_data():
-    Environment.show_environment_data()
+def choose_matrix_data():
+    Matrix.show_matrix_data()
     return int(input("environment_data.You choose SET No: "))
 
 
 def run_model():
-    if len(Nanoparticles.nanoparticles_data) != 0 and len(Nanostructures.nanostructures_data) != 0:
+    if len(Nanoparticles.nanoparticles_data) != 0 and len(Fibers.fibers_data) != 0:
         npart_choice = choose_nanoparticles_data()
-        nstruct_choice = choose_nanostructures_data()
-        envir_choice = choose_environment_data()
+        nstruct_choice = choose_fibers_data()
+        envir_choice = choose_matrix_data()
 
         if npart_choice > len(Nanoparticles.nanoparticles_data) - 1 or npart_choice < 0:
             npart_choice = 0
             print("Invalid nanoparticles_data SET №, common data -> SET №0")
-        if nstruct_choice > len(Nanostructures.nanostructures_data) - 1 or nstruct_choice < 0:
+        if nstruct_choice > len(Fibers.fibers_data) - 1 or nstruct_choice < 0:
             nstruct_choice = 0
             print("Invalid nanostructures_data dataSET №, impedance data -> SET №0")
-        if envir_choice > len(Environment.environment_data) - 1 or envir_choice < 0:
+        if envir_choice > len(Matrix.matrix_data) - 1 or envir_choice < 0:
             envir_choice = 0
             print("Invalid environment_data SET №, impedance data -> SET №0")
 

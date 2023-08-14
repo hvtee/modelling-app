@@ -1,10 +1,10 @@
 import numpy
 import matplotlib.pyplot as plot
 from math import e
-from classes.Environment import Environment
-from classes.Constants import Constants
-from classes.Nanoparticles import Nanoparticles
-from classes.Nanostructures import Nanostructures
+from model.Matrix import Matrix
+from model.Constants import Constants
+from model.Nanoparticles import Nanoparticles
+from model.Fibers import Fibers
 
 
 def graph(x, y, string):
@@ -22,16 +22,16 @@ def graph(x, y, string):
 def solve(number_npart, number_nstruct, number_envir, omega, Z):
     mu_0 = Constants.mu_0
     epsilon_0 = Constants.epsilon_0
-    mu_1 = Environment.environment_data[number_envir].mu_1
+    mu_1 = Matrix.matrix_data[number_envir].mu_1
     mu_2 = Nanoparticles.nanoparticles_data[number_npart].mu_2
-    sigma_1 = Environment.environment_data[number_envir].sigma_1
+    sigma_1 = Matrix.matrix_data[number_envir].sigma_1
     sigma_2 = Nanoparticles.nanoparticles_data[number_npart].sigma_2
     c = Nanoparticles.nanoparticles_data[number_npart].c
     a = Nanoparticles.nanoparticles_data[number_npart].a
-    d = Environment.environment_data[number_envir].d
-    ro = Nanostructures.nanostructures_data[number_nstruct].ro
-    C = Nanostructures.nanostructures_data[number_nstruct].C
-    L = Nanostructures.nanostructures_data[number_nstruct].L
+    d = Matrix.matrix_data[number_envir].d
+    ro = Fibers.fibers_data[number_nstruct].ro
+    C = Fibers.fibers_data[number_nstruct].C
+    L = Fibers.fibers_data[number_nstruct].L
 
     omega_copy = numpy.copy(omega)
     var = {'ro': ro, 'C': C, 'L': L, 'omega': omega_copy}

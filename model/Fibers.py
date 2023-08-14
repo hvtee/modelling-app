@@ -1,9 +1,9 @@
 import sqlite3
-from classes.sql import SQL
+from model.sql import SQL
 
 
-class Nanostructures:
-    nanostructures_data = []
+class Fibers:
+    fibers_data = []
 
     def __init__(self, name, ro, C, L):
         self.name = name
@@ -11,10 +11,10 @@ class Nanostructures:
         self.C = C
         self.L = L
 
-        Nanostructures.nanostructures_data.append(self)
+        Fibers.fibers_data.append(self)
 
     @classmethod
-    def create_nanostructures_data(cls):
+    def create_fibers_data(cls):
         try:
             name = input("\nName of impedance data set: ")
             ro = float(input("\nro: "))
@@ -28,11 +28,11 @@ class Nanostructures:
             print(f"IO error! {ioe}")
 
     @classmethod
-    def show_nanostructures_data(cls):
-        if len(Nanostructures.nanostructures_data) == 0:
+    def show_fibers_data(cls):
+        if len(Fibers.fibers_data) == 0:
             return print("Nanostructures data is empty!")
         counter = 0
-        for obj in cls.nanostructures_data:
+        for obj in cls.fibers_data:
             print("\nNANOSTRUCTURES DATA: ")
             print(f"Set No: {counter}")
             print(f"Name of nanostructures data set: {obj.name}")
@@ -43,7 +43,7 @@ class Nanostructures:
 
     def save_to_db(self):
         try:
-            Nanostructures.show_nanostructures_data()
+            Fibers.show_fibers_data()
             conn = sqlite3.connect('data/nanostructures_data.db')
             cur = conn.cursor()
             cur.execute(SQL.sql_nstruct_create)
@@ -71,7 +71,7 @@ class Nanostructures:
                 cur.execute(SQL.sql_nstruct_all)
                 rows = cur.fetchall()
                 for row in rows:
-                    Nanostructures(row[0], row[1], row[2], row[3])
+                    Fibers(row[0], row[1], row[2], row[3])
             except ValueError:
                 print("Error occurred in values of SET")
 
